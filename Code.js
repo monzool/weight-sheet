@@ -45,7 +45,7 @@ function validateEntry() {
     userForm.getRange(circumference_cell).setBackground('#d5f5e3');
     userForm.getRange(date_cell).setBackground('#eafaf1');
 
-    // Validating Employee ID
+    // Validating weight
     if (userForm.getRange(weight_cell).isBlank() === true) {
         ui.alert("Ugyldig eller manglende vægt. Angiv i kilo. Eks: 70.5");
         userForm.getRange(weight_cell).activate();
@@ -53,7 +53,7 @@ function validateEntry() {
         return false;
     }
 
-    // Validating Employee Name
+    // Validating circumference
     else if(userForm.getRange(circumference_cell).isBlank() === true) {
         ui.alert("Ugyldig eller manglende omkreds. Angiv omkreds i centimeter. Eks:  100.5");
         userForm.getRange(circumference_cell).activate();
@@ -126,14 +126,12 @@ function reloadDatabase() {
     function collect_mobile_form_data(rows) {
       entries = []
       rows.slice(1).forEach(function(value) {
-          console.log('Val:' + value);
-
           // Google forms deliver date as '09/01/2023 08.49.11'. Convert to iso8610 date
           entryDate = toIsoDate(value[0]);
 
           const entry = {
               date: entryDate,
-              person: value[1],
+              person: value[1].trim(),
               weight: value[2],
               circumference: value[3],
           }
@@ -156,7 +154,7 @@ function reloadDatabase() {
               weight: value[0],
               circumference: value[1],
               date: entryDate,
-              person: value[7],
+              person: value[7].trim(),
           }
           entries.push([entry.date, entry.person, entry.weight, entry.circumference])
       });
@@ -164,10 +162,10 @@ function reloadDatabase() {
       return entries
     }
 
-    let mobile_rows = mobile_data.getDataRange().getValues();
+    let mobile_rows = mobile_data.getDataRange().getValues()
     mobile_entries = collect_mobile_form_data(mobile_rows)
 
-    let user_rows = user_data.getDataRange().getValues();
+    let user_rows = user_data.getDataRange().getValues()
     user_entries = collect_user_form_data(user_rows)
 
     entries = mobile_entries.concat(user_entries)
