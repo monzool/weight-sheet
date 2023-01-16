@@ -177,3 +177,90 @@ function reloadDatabase() {
         database.appendRow(entry)
     });
 }
+
+
+function prepareChartData() {
+    let spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    let database = spreadsheet.getSheetByName("Database");
+    let sheet = spreadsheet.getSheetByName("View 1");
+
+    sheet.clearContents();
+    sheet.clearFormats()
+
+    // Colect data from database
+    let db_rows = database.getDataRange().getValues()
+    let entries = db_rows.map((row) => {
+        return {
+            date: (new Date(row[0])).toISOString().split('T', 1)[0],  // date/time to date
+            user: row[1],
+            weight: row[2],
+            circumference: row[3]
+        }
+    })
+
+
+    // Find unique users
+    let unique_users = new Map()
+    entries.forEach((entry) => {
+        unique_users.set(entry.user, entry.user)
+    })
+
+
+    // Add header with user names
+    var header_row = [""]
+    for (let user of unique_users.keys()) {
+        header_row.push(user)
+    }
+    header_row.push("")
+    // Colums for weight and circumference
+    header_row = header_row.concat(header_row)
+
+
+    // Find unique dates to make only one row pr day
+    unique_dates = [];
+    entries.forEach((entry) => {
+        if (! unique_dates.find((element) => element == entry.date)) {
+            unique_dates.push(entry.date)
+        }
+    })
+
+
+    const getValue = (unique_date, unique_users, entries, get_data) => {
+        values = []
+
+        let entries_at_date = entries.filter((entry) => entry.date === unique_date)
+
+        for (let user of unique_users.keys()) {
+            if (found = entries_at_date.find((entry) => entry.user === user)) {
+                // User has entered data
+                values.push(get_data(found))
+            } else {
+                values.push("")
+            }
+        }
+
+        return values
+    }
+
+    rows = []
+    unique_dates.forEach((unique_date) => {
+        const weight_row = getValue(unique_date, unique_users, entries, (found) => found.weight)
+        const circumference_row = getValue(unique_date, unique_users, entries, (found) => found.circumference)
+
+        // date | weight | circumference
+        const row =
+            [unique_date]
+            .concat(weight_row)
+            .concat(["", unique_date])
+            .concat(circumference_row)
+        rows.push(row)
+    })
+
+    // Apply to sheet
+    sheet.appendRow(header_row)
+    rows.forEach((row) => {
+        sheet.appendRow(row)
+    })
+}
+
+
