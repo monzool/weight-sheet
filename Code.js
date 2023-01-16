@@ -180,12 +180,12 @@ function reloadDatabase() {
 }
 
 
-function prepareChartData() {
-    let spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    let database = spreadsheet.getSheetByName("Database");
-    let sheet = spreadsheet.getSheetByName("View 1");
+function updateView1() {
+    let spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+    let database = spreadsheet.getSheetByName("Database")
+    let sheet = spreadsheet.getSheetByName("View 1")
 
-    sheet.clearContents();
+    sheet.clearContents()
     sheet.clearFormats()
 
     // Colect data from database
@@ -265,3 +265,10 @@ function prepareChartData() {
 }
 
 
+function onSelectionChange(e) {
+    const activeSheet = SpreadsheetApp.getActiveSheet()
+    if (activeSheet.getName() == "View 1") {
+        // This runs on any update on the sheet (open, cell selection, etc)
+        updateView1()
+    }
+}
