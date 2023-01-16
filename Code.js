@@ -3,6 +3,14 @@ const weight_cell = "D4"
 const circumference_cell = "D6"
 const date_cell = "D8"
 
+function toIsoDate(value) {
+    const offset = value.getTimezoneOffset();
+    value = new Date(value.getTime() - (offset*60*1000));
+    value = value.toISOString().split('T')[0];
+    return value
+}
+
+
 // Function to Clear the User Form
 function clearForm() {
     var spreadsheet = SpreadsheetApp.getActiveSpreadsheet(); //declare a variable and set with active google sheet
@@ -116,13 +124,6 @@ function reloadDatabase() {
 
     database.clearContents();
 
-    function toIsoDate(value) {
-        const offset = value.getTimezoneOffset();
-        value = new Date(value.getTime() - (offset*60*1000));
-        value = value.toISOString().split('T')[0];
-        return value
-    }
-
     function collect_mobile_form_data(rows) {
       entries = []
       rows.slice(1).forEach(function(value) {
@@ -191,7 +192,7 @@ function prepareChartData() {
     let db_rows = database.getDataRange().getValues()
     let entries = db_rows.map((row) => {
         return {
-            date: (new Date(row[0])).toISOString().split('T', 1)[0],  // date/time to date
+            date: toIsoDate(row[0]),  // date/time to date
             user: row[1],
             weight: row[2],
             circumference: row[3]
